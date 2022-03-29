@@ -1,0 +1,15 @@
+setuptools
+pytest
+pygments
+pandas
+numpy
+matplotlib
+jupyter
+scikit-learn
+ipython
+tqdm
+seaborn
+tensorflow
+tensorflow_datasets
+pydot
+markupsafe==2.0.1
