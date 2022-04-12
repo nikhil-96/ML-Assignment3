@@ -25,8 +25,8 @@ stop_training = True
 
 # Uncomment the following to check whether you have access to a GPU in Google Colab
 # See further instructione below.
-import tensorflow as tf
-tf.config.experimental.list_physical_devices('GPU')
+# import tensorflow as tf
+# tf.config.experimental.list_physical_devices('GPU')
 
 
 # In[4]:
@@ -467,29 +467,25 @@ from tensorflow.keras import optimizers
 
 def build_model_1_1():
     model = models.Sequential()
-    model.add(layers.Conv2D(32, (3, 3), activation='relu', padding='same', kernel_initializer='he_uniform', input_shape=(IMG_SIZE, IMG_SIZE, 3)))
+    model.add(layers.Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', input_shape=(IMG_SIZE, IMG_SIZE, 3)))
     model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+    model.add(layers.Conv2D(32, (3, 3), activation='relu', kernel_initializer='he_uniform'))
     model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Dropout(0.2))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform'))
     model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Dropout(0.3))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu', kernel_initializer='he_uniform'))
     model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Dropout(0.3))
-    model.add(layers.Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
+    model.add(layers.Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform'))
     model.add(layers.BatchNormalization())
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Dropout(0.3))
-    model.add(layers.Conv2D(128, (3, 3), activation='relu', kernel_initializer='he_uniform', padding='same'))
-    model.add(layers.BatchNormalization())
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.4))
     model.add(layers.Flatten())
     model.add(layers.Dense(256, activation='relu', kernel_initializer='he_uniform'))
     model.add(layers.BatchNormalization())
@@ -501,11 +497,9 @@ def build_model_1_1():
     return model
 
 # run_evaluation("model_1_1", build_model_1_1, evaluation_split, base_dir, 
-#                train=True, epochs=40, batch_size=32)
+#                train=True, epochs=15, batch_size=32)
 
-answer_q_1_1 = """
-               Your answer 
-               """
+answer_q_1_1 = "Model has 5 conv layers with gradual increase of 3x3 filters to compensate loss of resolution after max-pooling. Used Batch nomalization to help the network converge faster and make it less prone to vanishing gradients. Dropout used for regularization. Max-pooling to reduce the resolution & increase translation invariance. It then passed to 256 nodes dense layer and output layer of 3 nodes as we have 3 classes. Batch size 32 to avoid generalization gap. Learning rate 0.001, adapted using the Adam optimizer. Network trained for 15 epochs as it started showing 100% val_acc and not overfitting."
 # print("Answer is {} characters long".format(len(answer_q_1_1)))
 
 
@@ -540,7 +534,7 @@ def augment_data():
         rotation_range=20,
         width_shift_range=0.1,
         height_shift_range=0.1,
-        # shear_range=0.3,
+        shear_range=0.1,
         # zoom_range=0.08,
         horizontal_flip=True,
         # vertical_flip=True,
@@ -554,9 +548,9 @@ def build_model_1_2():
 # You can add a steps_per_epoch parameter if you like
 steps = int(X_train.shape[0] / 32)
 # run_evaluation("model_1_2", build_model_1_2, augment_data(), base_dir, 
-#                train=True, generator=True, epochs=40, batch_size=None, steps_per_epoch=steps)
+#                train=True, generator=True, epochs=15, batch_size=None, steps_per_epoch=steps)
 
-answer_q_1_2 = "We're doing data augmentation to generate more data, to train model on different variation of images which contribute information to the network. I did image_rotation upto 40 degrees to get more close to real-life images. I shifted images left-right and up-down upto 20% of image width and height respectively to get more information if images are out of frame or to train model to look for hand in different part of axis. I also generated horizontal flipped images. Overall, model is performing quite well with almost '1' accuracy on validation set."
+answer_q_1_2 = "Data augmentation to generate more data, to train model on different variation of images which contribute information to the network. Image_rotation upto 20 degrees, used slight width and height shift and slant the image upto 0.1 degrees to get more naturally occuring images and improve generalization error. Zoom in didn't lead to improvement in accuracy as images are already pretty visible. Used both horizontal and vertical shift since the network should be invariant to small translations. It is shown that data augmentation has helped the model to achieve accuracy of 100% on validation set."
 
 # print("Answer is {} characters long".format(len(answer_q_1_2)))
 
@@ -620,37 +614,37 @@ def plot_misclassifications():
     y_pred = model.predict(X_test)
 
     misclassified_samples = np.nonzero(np.argmax(y_test, axis=1) != np.argmax(y_pred, axis=1))[0]
-    misclassified_samples_paper = []
+    misclassified_samples_rock = []
     misclassified_samples_scissors = []
     for x in misclassified_samples:
-      if(np.argmax(y_test[x]) == 1):
-        misclassified_samples_paper.append(x)
+      if(np.argmax(y_test[x]) == 0):
+        misclassified_samples_rock.append(x)
       
       if(np.argmax(y_test[x]) == 2):
         misclassified_samples_scissors.append(x)
 
     fig, axes = plt.subplots(1, 5,  figsize=(10, 5))
-    for nr, i in enumerate(misclassified_samples_paper[:5]):
+    for nr, i in enumerate(misclassified_samples_rock[:5]):
         axes[nr].imshow(X_test[i])
         axes[nr].set_xlabel("Predicted: %s,\n Actual : %s" % (class_names[np.argmax(y_pred[i])],class_names[np.argmax(y_test[i])]))
         axes[nr].set_xticks(()), axes[nr].set_yticks(())
 
-    plt.title("Class:Paper misclassified")
+    plt.title("Class:Rock misclassified")
     plt.show()
 
-    # fig, axes = plt.subplots(1, 5,  figsize=(10, 5))
-    # for nr, i in enumerate(misclassified_samples_scissors[:5]):
-    #     axes[nr].imshow(X_test[i])
-    #     axes[nr].set_xlabel("Predicted: %s,\n Actual : %s" % (class_names[np.argmax(y_pred[i])],class_names[np.argmax(y_test[i])]))
-    #     axes[nr].set_xticks(()), axes[nr].set_yticks(())
+    fig, axes = plt.subplots(1, 4,  figsize=(10, 5))
+    for nr, i in enumerate(misclassified_samples_scissors[:45]):
+        axes[nr].imshow(X_test[i])
+        axes[nr].set_xlabel("Predicted: %s,\n Actual : %s" % (class_names[np.argmax(y_pred[i])],class_names[np.argmax(y_test[i])]))
+        axes[nr].set_xticks(()), axes[nr].set_yticks(())
 
-    # plt.title("Class:Scissors misclassified")
-    # plt.show()
+    plt.title("Class:Scissors misclassified")
+    plt.show()
 
 # plot_confusion_matrix()
 # plot_misclassifications()
 
-answer_q_2 = "Shown in confusion matrix, Rock class is perfectly predicted by the model as it learned the shape of a fist. Sometimes model confused paper as rock and scissors as paper. The reason model is confused paper as rock is because there is one particular type of paper image (repeated) in which there's no gap between fingers unlike other paper images and model learned this no gap between fingers pattern for rock class. Similar reason for scissors and paper as there's one scissor image (repeated) in which there is thumb with space from 2 fingers unlike other scissor images which have only 2 fingers."
+answer_q_2 = "Shown in confusion matrix, Paper class is perfectly predicted by model as it learned the pattern of looking at 5 fingers and spaces between them. Sometimes model confused rock as paper because of one particular type of rock image (repeated) in which the fist is not shown properly and some fingers are showing which confuses it with paper. For scissors and paper, there's one scissor image (repeated) in which there is thumb with space from 2 fingers. Clearly model needs to be trained on more data to understand these unlikely patterns. Still model is getting test acc of 97% which is pretty good."
 # print("Answer is {} characters long".format(len(answer_q_2)))
 
 
@@ -722,28 +716,7 @@ test_accuracy_3_1 = test_acc
 # - Intrepret the 2D TSNE map in terms of the formed clusters. Talk about the performance of the transfer learning model. Store your answer in `answer_q_3`. 
 # - You are allowed **600** characters for this answer (but don’t ramble).
 
-# In[25]:
-
-
-model = load_model(os.path.join(base_dir, 'model_3_1.h5'))
-model.summary()
-
-
-# In[26]:
-
-
-#model2 = tf.keras.models.Model(inputs=model.input, outputs=model.get_layer('global_average_pooling2d').output)
-model2 = tf.keras.models.Model(inputs=model.input, outputs=model.layers[1].output)
-features = model2.predict(X_train)
-
-
-# In[27]:
-
-
-features.shape
-
-
-# In[28]:
+# In[31]:
 
 
 from sklearn.manifold import TSNE
@@ -757,60 +730,44 @@ def create_embeddings(model_file):
 def compute_tsne(original_array):
     """ Returns the 2D embeddings of original_array created by TSNE
     """
-    return TSNE(verbose=0).fit_transform(original_array)
+    return TSNE(random_state=13, verbose=0, n_jobs = -1).fit_transform(original_array)
 
 # n-sized embeddings extracted from X_train and reduced to 2-sized embeddings
 # dn_embs = create_embeddings("model_3_1")
 # d2_embs = compute_tsne(dn_embs)
 
 
-# In[29]:
+# In[32]:
 
 
 # d2_embs.shape
 
 
-# In[30]:
+# In[33]:
 
 
 import seaborn as sns
 
 def plot_tsne(tsne_embeds, labels):
-    marker_size=15
-    label = []
-    for i in np.argmax(labels, axis=1):
-      label.append(class_names[i])
-
-    plt.scatter(tsne_embeds[:,0], tsne_embeds[:,1], marker_size, c=np.argmax(labels, axis=1))
-    plt.title("tSNE embeddings of all images")
-    cbar= plt.colorbar()
-    cbar.set_label("Label", labelpad=+1)
+    
+    x = [elem[0] for elem in tsne_embeds]
+    y = [elem[1] for elem in tsne_embeds]
+    fig = plt.figure(figsize = (5, 5))
+    labels = np.argmax(labels, axis=1)
+    num_classes = len(np.unique(labels))
+    palette = np.array(sns.color_palette("colorblind", num_classes))
+    plt.scatter(x, y, c = palette[labels.astype(np.int)])
+    size = 15
+        
+    for i in range(num_classes):
+        x_text, y_text = np.median(tsne_embeds[labels == i, :], axis = 0)
+        txt = plt.text(x_text, y_text, class_names[i], fontsize = size)
     plt.show()
-    print(class_names)
 
 # plot_tsne(d2_embs, y_train)
 
-answer_q_3 = """
-               Your answer 
-               """
+answer_q_3 = "The embedding learned by conv part of network has dim. of 1280, tSNE reduced it to 2D. Plotted the 2D embedding, color-coded by class label, we see that it clearly separated the three classes into clusters, although some images of paper fall inside the scissor cluster as they're mostly misclassified. I've imported MobileNetV2 model pretrained on ImageNet (include_top=False), freeze the top 150 layers, trained the last 4 layers and then used one dense layer to get the optimum performance. Used Adam optimizer with very low learning rate to avoid catastrophic forgetting. Got test acc of 97%."
 # print("Answer is {} characters long".format(len(answer_q_3)))
-
-
-# In[31]:
-
-
-# np.argmax(y_train, axis=1)
-# label = []
-# for i in np.argmax(y_train, axis=1):
-#   label.append(class_names[i])
-
-# label
-
-
-# In[32]:
-
-
-y_train
 
 
 # In[ ]:
@@ -818,4 +775,4 @@ y_train
 
 
 
-last_edit = 'April 04, 2022'
+last_edit = 'April 12, 2022'
