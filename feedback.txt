@@ -1,0 +1,27 @@
+Feedback for Patni, N.:
+
+Q1.1 (first CNN model): 13.0/15
+Overall good, but the model seems overly complicated, and has trouble converging in the first epoch. Did you try smaller models?
+
+Q1.2 (data augmentation): 7.0/8
+Good, but did you also consider augmentations that help the model ignore the skin colors? E.g. using color augmentation?
+
+Validation score (/100 and scaled /7): 7/7
+100
+
+Q2.1 (evaluate on test set, scaled /5): 4.55/5
+OK. Test score (/100 and scaled /5): 96.77
+
+Q2.2 (confusion matrix and misclassifications): 20.0/20
+Well done
+
+Q3.1 (transfer of pretrained MobileNet): 20.0/20
+OK
+
+Test score (/100 and scaled /5).1: 4.65/5
+97.31
+
+Q3.2 (visualize with tSNE): 20.0/20
+Well done!
+
+Total: 96.2 / 100
